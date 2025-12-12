@@ -24,20 +24,28 @@ const Dashboard = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [form] = Form.useForm();
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
-  useEffect(() => {
-    const filtered = tasks.filter(
-      (t) =>
-        t.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        (t.description || "").toLowerCase().includes(searchText.toLowerCase())
-    );
-    setFilteredTasks(filtered);
-  }, [searchText, tasks]);
+ useEffect(() => {
+    let result = tasks;
+    if (searchText) {
+      result = result.filter(
+        (t) =>
+          t.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          (t.description || "").toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+    if (statusFilter !== "all") {
+      result = result.filter((t) => t.status === statusFilter);
+    }
+
+    setFilteredTasks(result);
+  }, [tasks, searchText, statusFilter]);
 
   const fetchTasks = async () => {
     try {
@@ -164,6 +172,19 @@ const Dashboard = () => {
               onChange={(e) => setSearchText(e.target.value)}
               className="w-72"
             />
+            <Select
+                defaultValue="all"
+                value={statusFilter}
+                onChange={setStatusFilter}
+                size="large"
+                style={{ width: 180 ,marginLeft:"10px" }}
+                options={[
+                  { label: "All Tasks", value: "all" },
+                  { label: "Pending", value: "pending" },
+                  { label: "In Progress", value: "in-progress" },
+                  { label: "Completed", value: "completed" },
+                ]}
+              />
 
             <Button
               type="primary"
